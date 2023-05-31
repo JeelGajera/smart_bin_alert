@@ -1,6 +1,9 @@
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:smartbin_alert/utils/colors.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:smartbin_alert/views/home_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({Key? key}) : super(key: key);
@@ -10,8 +13,30 @@ class SignupScreen extends StatefulWidget {
 }
 
 class SignupScreenState extends State<SignupScreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  Future<UserCredential> signInWithGoogle() async {
+    final GoogleSignInAccount? googleSignInAccount =
+        await _googleSignIn.signIn();
+    final GoogleSignInAuthentication googleSignInAuthentication =
+        await googleSignInAccount!.authentication;
+
+    final AuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleSignInAuthentication.accessToken,
+      idToken: googleSignInAuthentication.idToken,
+    );
+
+    return await _auth.signInWithCredential(credential);
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Check if the user is already signed in
+    if (_auth.currentUser != null) {
+      return const HomeScreen();
+    }
+
     return Scaffold(
       backgroundColor: primaryColor,
       body: Center(
@@ -53,7 +78,18 @@ class SignupScreenState extends State<SignupScreen> {
               ),
               const Spacer(),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () async {
+                  final UserCredential userCredential =
+                      await signInWithGoogle();
+                  print(userCredential.user!.displayName);
+                  // ignore: use_build_context_synchronously
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const HomeScreen(),
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: tertiaryColor,
                   elevation: 12,
@@ -66,16 +102,9 @@ class SignupScreenState extends State<SignupScreen> {
                       fontWeight: FontWeight.bold,
                       color: secondaryColor),
                 ),
-                child: InkWell(
-                  onTap: () {
-                    MaterialPageRoute(
-                      builder: (context) => const SignupScreen(),
-                    );
-                  },
-                  child: const Text(
-                    'Let\'s get started!🚀',
-                    style: TextStyle(color: yellowColor),
-                  ),
+                child: const Text(
+                  'Let\'s get started!🚀',
+                  style: TextStyle(color: yellowColor),
                 ),
               ),
             ],
@@ -83,5 +112,30 @@ class SignupScreenState extends State<SignupScreen> {
         ),
       ),
     );
+  }
+
+  // static Future<String?> googleSignIn() async {
+  //   try {
+  //     await Firebase.initializeApp(
+  //       options: DefaultFirebaseOptions.currentPlatform,
+  //     );
+  //     await FirebaseAuth.instance.signInWithRedirect(
+  //       GoogleAuthProvider(),
+  //     );
+  //     return null;
+  //   } on FirebaseAuthException catch (ex) {
+  //     return "${ex.code}: ${ex.message}";
+  //   } on UnimplementedError catch (ex) {
+  //     return ex.message;
+  //   }
+  // }
+
+  static Future<String?> signOut() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      return null;
+    } on FirebaseAuthException catch (ex) {
+      return "${ex.code}: ${ex.message}";
+    }
   }
 }
