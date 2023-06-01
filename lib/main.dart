@@ -12,8 +12,8 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   // Check if the user is authenticated
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final User? currentUser = _auth.currentUser;
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  final User? currentUser = auth.currentUser;
   Widget initialRoute = const SignupScreen();
 
   if (currentUser != null) {
@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'SmartBin Alert',
+      themeMode: ThemeMode.system,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFF5EAD4)),
         useMaterial3: true,

@@ -79,16 +79,22 @@ class SignupScreenState extends State<SignupScreen> {
               const Spacer(),
               ElevatedButton(
                 onPressed: () async {
-                  final UserCredential userCredential =
-                      await signInWithGoogle();
-                  print(userCredential.user!.displayName);
-                  // ignore: use_build_context_synchronously
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const HomeScreen(),
-                    ),
-                  );
+                  try {
+                    final UserCredential userCredential =
+                        await signInWithGoogle();
+                    final User? user = userCredential.user;
+                    if (user != null) {
+                      // ignore: use_build_context_synchronously
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HomeScreen(),
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    Exception(e);
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: tertiaryColor,
@@ -113,22 +119,6 @@ class SignupScreenState extends State<SignupScreen> {
       ),
     );
   }
-
-  // static Future<String?> googleSignIn() async {
-  //   try {
-  //     await Firebase.initializeApp(
-  //       options: DefaultFirebaseOptions.currentPlatform,
-  //     );
-  //     await FirebaseAuth.instance.signInWithRedirect(
-  //       GoogleAuthProvider(),
-  //     );
-  //     return null;
-  //   } on FirebaseAuthException catch (ex) {
-  //     return "${ex.code}: ${ex.message}";
-  //   } on UnimplementedError catch (ex) {
-  //     return ex.message;
-  //   }
-  // }
 
   static Future<String?> signOut() async {
     try {
