@@ -30,6 +30,12 @@ class SignupScreenState extends State<SignupScreen> {
     return await _auth.signInWithCredential(credential);
   }
 
+  // signout the user
+  Future<void> signOut() async {
+    await _auth.signOut();
+    await _googleSignIn.signOut();
+  }
+
   @override
   Widget build(BuildContext context) {
     // Check if the user is already signed in
@@ -118,14 +124,5 @@ class SignupScreenState extends State<SignupScreen> {
         ),
       ),
     );
-  }
-
-  static Future<String?> signOut() async {
-    try {
-      await FirebaseAuth.instance.signOut();
-      return null;
-    } on FirebaseAuthException catch (ex) {
-      return "${ex.code}: ${ex.message}";
-    }
   }
 }
